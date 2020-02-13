@@ -1,0 +1,1 @@
+conda activate zokrates && python server.py

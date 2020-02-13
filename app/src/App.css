@@ -113,3 +113,38 @@
 .grow:hover {
   transform: scale(1.1);
 }
+
+.basket {
+  transition: opacity 0.5s;
+  opacity: 1;
+}
+.basket.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+body {
+  font-family: "Kanit", sans-serif;
+}
+
+.center-h {
+  display: flex;
+  justify-content: center;
+}
+
+.filled-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.filled-img > img {
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  /* width: 100%; */
+  /* min-width: 100%;
+  min-height: 100%; */
+}

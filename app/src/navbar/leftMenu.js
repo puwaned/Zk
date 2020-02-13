@@ -21,7 +21,7 @@ class LeftMenu extends Component {
       >
         <Menu.Item key="home">
           <Link to="/">
-            <Icon type="form" />
+            <Icon type="home" />
             Home
           </Link>
         </Menu.Item>
@@ -31,8 +31,12 @@ class LeftMenu extends Component {
             Create Proofs
           </Link>
         </Menu.Item>
-
-        
+        <Menu.Item key="dev">
+          <Link to="/dev">
+            <Icon type="tool" />
+            For Developer
+          </Link>
+        </Menu.Item>
       </Menu>
     );
   }

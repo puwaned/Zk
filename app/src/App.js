@@ -1,18 +1,31 @@
 import React, { Suspense } from "react";
-
+import { HashRouter, Switch, Route } from "react-router-dom";
+import "./App.css";
+import Navbar from "./navbar";
+const Home = React.lazy(() => import("./components/Home"));
+const Create = React.lazy(() => import("./components/Create"));
+const Dev = React.lazy(() => import("./components/Dev"));
+const loading = () => (
+  <center>
+    <div className="animated fadeIn pt-3 text-center">Loading...</div>
+  </center>
+);
 class App extends React.Component {
-  componentDidMount() {
-    fetch("http://127.0.0.1:5000/get")
-      .then(res => res.json())
-      .then(res => {
-        console.log(res);
-      });
-  }
-
   render() {
     return (
       <div>
-        <p>Hello</p>
+        <HashRouter>
+          <Navbar />
+          <div className="container-custom">
+            <Suspense fallback={loading()}>
+              <Switch>
+                <Route path="/create" component={Create} />
+                <Route path="/dev" component={Dev} />
+                <Route exact path="/" component={Home} />
+              </Switch>
+            </Suspense>
+          </div>
+        </HashRouter>
       </div>
     );
   }

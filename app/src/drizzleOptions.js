@@ -1,13 +1,16 @@
-import Web3 from "web3";
-import Election from "./contracts/Election.json";
 import Verifier from "./contracts/Verifier.json";
+import Election from "./contracts/Election.json";
 
 const options = {
   web3: {
     block: false,
-    customProvider: new Web3("ws://localhost:8545")
+    fallback: {
+      type: "ws",
+      url: "ws://127.0.0.1:8545"
+    }
   },
-  contracts: [Election, Verifier],
+  contracts: [Verifier, Election],
+  events: {},
   polls: {
     accounts: 1500
   }

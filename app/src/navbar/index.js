@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import LeftMenu from "./left";
-import RightMenu from "./right";
+import LeftMenu from "./leftMenu";
+import RightMenu from "./rightMenu";
 
 class Navbar extends Component {
   loading = () => (
