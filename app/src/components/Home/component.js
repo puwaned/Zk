@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { ContractData } from "drizzle-react-components";
+import { ContractData, ContractForm } from "drizzle-react-components";
 import { Card, Button, Col, Row } from "antd";
 import Modal from "./componentModal";
 import PropTypes from "prop-types";
@@ -16,10 +16,6 @@ export default class MyComponent extends Component {
   constructor(props, context) {
     super(props);
     this.state = { visible: false, candidateIdSelected: 0 };
-  }
-
-  componentDidMount() {
-    console.log(this.props.accounts[0]);
   }
 
   handleClick = e => {
@@ -71,7 +67,6 @@ export default class MyComponent extends Component {
           id={this.state.candidateIdSelected}
           drizzle={this.context.drizzle}
         />
-
         <div style={{ display: "flex", justifyContent: "center" }}>
           <h1>โปรดเลือกผู้สมัครที่ต้องการ</h1>
         </div>

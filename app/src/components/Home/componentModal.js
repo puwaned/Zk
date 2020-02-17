@@ -14,7 +14,6 @@ const candidatesData = [
 ];
 
 const VoteBox = props => {
-  const [id, setId] = useState();
   const [status, setStatus] = useState();
   const [description, setDescription] = useState();
   const [image, setImage] = useState();
@@ -22,8 +21,22 @@ const VoteBox = props => {
   const handleOnClose = () => {
     props.parentCallback(false);
   };
-  const handleOnConfirm = () => {
-    setTimeout(() => {}, 2000);
+  const clearModal = () => {
+    setImage(
+      <img
+        alt={candidatesData[props.id].name}
+        src={process.env.PUBLIC_URL + candidatesData[props.id].image}
+      />
+    );
+    setStatus(candidatesData[props.id].name);
+    setDescription(
+      <ContractData
+        contract="Election"
+        method="getScore"
+        methodArgs={[props.id]}
+        render={e => "คะแนน : " + e}
+      />
+    );
   };
   useEffect(() => {
     setStatus(candidatesData[props.id].name);
@@ -92,9 +105,15 @@ const VoteBox = props => {
                       setStatus(
                         <span style={{ fontSize: 15 }}>กำลังสร้างหลักฐาน</span>
                       );
-                      return converSecret(res.result);
+                      getProofs(converSecret(res.result));
                       //fourth fetch
                     } else {
+                      setImage(
+                        <img
+                          alt="correct"
+                          src={process.env.PUBLIC_URL + "incorrect.jpg"}
+                        />
+                      );
                       setStatus(
                         <span style={{ fontSize: 15, color: "red" }}>
                           ลายนิ้วมือไม่ถูกต้อง
@@ -102,9 +121,6 @@ const VoteBox = props => {
                       );
                       setDescription("ไม่พร้อมดำเนินการ");
                     }
-                  })
-                  .then(res => {
-                    getProofs(res);
                   });
               }
             });
@@ -113,6 +129,9 @@ const VoteBox = props => {
             <span style={{ fontSize: 15, color: "red" }}>ไม่พบเครื่องแสกน</span>
           );
           setDescription("ไม่พร้อมดำเนินการ");
+          setImage(
+            <img alt="unplug" src={process.env.PUBLIC_URL + "unplug.jpg"} />
+          );
         }
       });
   };
@@ -153,12 +172,18 @@ const VoteBox = props => {
         if (res.result !== "false") {
           setStatus(<span style={{ fontSize: 15 }}>ลายนิ้วมือถูกต้อง</span>);
           setDescription("พร้อมดำเนินการ");
+          setImage(
+            <img alt="correct" src={process.env.PUBLIC_URL + "correct.jpg"} />
+          );
           sendVote(res.result);
         } else {
           setStatus(
             <span style={{ fontSize: 15, color: "red" }}>เข้ารหัสผิดพลาด</span>
           );
           setDescription("ไม่พร้อมดำเนินการ");
+          setImage(
+            <img alt="correct" src={process.env.PUBLIC_URL + "incorrect.jpg"} />
+          );
         }
       });
   };
@@ -167,7 +192,7 @@ const VoteBox = props => {
     let web3 = props.drizzle.web3;
     let ElectionContract = new web3.eth.Contract(
       ElectionInterface.abi,
-      "0x09D3305b2b3689D779777AEa67821AAdBf38795B"
+      "0xFa138ef09ae751E8E67FbA257EFEDD8527E3ce0d"
     );
 
     let A = proof["proof"]["a"].map(item => {
@@ -194,19 +219,16 @@ const VoteBox = props => {
       .Vote(props.id, A, [B1, B2], C, input)
       .send({ from: props.addr })
       .then(function(receipt) {
-        /*if (receipt.status === true) {
-          socket.emit("request_to_server", "vote_success");
+        if (receipt.status === true) {
         } else {
-          socket.emit("request_to_server", "vote_fail");
-        }*/
+        }
       })
-      .catch(err => {
-        /*socket.emit("request_to_server", "vote_fail");*/
-      });
+      .catch(err => {});
   };
 
   return (
     <Modal
+      afterClose={clearModal}
       title={
         <div style={{ display: "flex" }}>
           <div style={{ fontSize: "1.5rem", position: "absolute" }}>
