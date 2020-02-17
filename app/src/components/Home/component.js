@@ -19,7 +19,7 @@ export default class MyComponent extends Component {
   }
 
   componentDidMount() {
-    console.log(this.context.drizzle);
+    console.log(this.props.accounts[0]);
   }
 
   handleClick = e => {
@@ -69,6 +69,7 @@ export default class MyComponent extends Component {
           addr={this.props.accounts[0]}
           parentCallback={this.handleModal}
           id={this.state.candidateIdSelected}
+          drizzle={this.context.drizzle}
         />
 
         <div style={{ display: "flex", justifyContent: "center" }}>

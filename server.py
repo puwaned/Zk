@@ -87,16 +87,25 @@ def check():
     subprocess.call(
         "cd " + cfg["app_location"] + "/client/client/bin/Debug/ &&\
         client.exe check_device", shell=True)
-    with open(cfg["app_location"]+'/client/client/bin/Debug/result.txt') as f:
+    with open(cfg["app_location"]+'/client/client/bin/Debug/check_device.txt') as f:
         data = f.read()
     return data
 
 
-def verify():
+def verify_1():
     subprocess.call(
         "cd " + cfg["app_location"] + "/client/client/bin/Debug/ &&\
-        client.exe SUWAT", shell=True)
-    with open(cfg["app_location"]+'/client/client/bin/Debug/result.txt') as f:
+        client.exe verify_1", shell=True)
+    with open(cfg["app_location"]+'/client/client/bin/Debug/finger.txt') as f:
+        data = f.read()
+    return data
+
+
+def verify_2(finger):
+    subprocess.call(
+        "cd " + cfg["app_location"] + "/client/client/bin/Debug/ &&\
+        client.exe verify_2 " + finger, shell=True)
+    with open(cfg["app_location"]+'/client/client/bin/Debug/verify.txt') as f:
         data = f.read()
     return data
 
@@ -140,10 +149,18 @@ def makes_witness():
     ''' ******end of zokrates route****** '''
 
 
-@app.route("/start_verify", methods=["GET"])
-def get():
-    "'result = get_file()'"
-    return json.dumps({'result': 200})
+@app.route("/verify_1", methods=["GET"])
+def v1():
+    result = verify_1()
+    return json.dumps({'result': result, 'status': 200})
+
+
+@app.route("/verify_2", methods=["POST"])
+def v2():
+    data = json.loads(request.data)
+    finger = data["finger"]
+    result = verify_2(finger)
+    return json.dumps({'result': result})
 
 
 @app.route("/check_device", methods=["GET"])

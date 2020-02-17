@@ -1,10 +1,9 @@
 import React, { Component, useState, useEffect } from "react";
 import { Card, Modal, Button, Icon, Row, Col, Spin } from "antd";
 import { ContractData } from "drizzle-react-components";
-import axios from "axios";
 import BigNumber from "bignumber.js";
 import ElectionInterface from "../../contracts/Election.json";
-import { object } from "prop-types";
+
 const { Meta } = Card;
 
 const candidatesData = [
@@ -56,7 +55,7 @@ const VoteBox = props => {
       />
     );
 
-    //first fetch
+    //first fetch check device status
     fetch("http://127.0.0.1:5000/check_device")
       .then(res => res.json())
       .then(res => {
@@ -65,13 +64,144 @@ const VoteBox = props => {
             <span style={{ fontSize: 15 }}>วางนิ้วลงบนเครื่องแสกน</span>
           );
           setDescription("พร้อมดำเนินการ");
-          //second fetch
+
+          //second fetch get finger to verify
+          fetch("http://127.0.0.1:5000/verify_1")
+            .then(res => res.json())
+            .then(res => {
+              if (res.status === 200) {
+                setStatus(
+                  <span style={{ fontSize: 15 }}>กำลังตรวจลายนิ้วมือ</span>
+                );
+                setDescription("กำลังดำเนินการ");
+                //third fetch
+                fetch("http://127.0.0.1:5000/verify_2", {
+                  headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json"
+                  },
+                  method: "POST",
+                  body: JSON.stringify({
+                    finger: res.result
+                  })
+                })
+                  .then(res => res.json())
+                  .then(res => {
+                    console.log(res.result);
+                    if (res.result !== "false") {
+                      setStatus(
+                        <span style={{ fontSize: 15 }}>กำลังสร้างหลักฐาน</span>
+                      );
+                      return converSecret(res.result);
+                      //fourth fetch
+                    } else {
+                      setStatus(
+                        <span style={{ fontSize: 15, color: "red" }}>
+                          ลายนิ้วมือไม่ถูกต้อง
+                        </span>
+                      );
+                      setDescription("ไม่พร้อมดำเนินการ");
+                    }
+                  })
+                  .then(res => {
+                    getProofs(res);
+                  });
+              }
+            });
         } else {
           setStatus(
             <span style={{ fontSize: 15, color: "red" }}>ไม่พบเครื่องแสกน</span>
           );
           setDescription("ไม่พร้อมดำเนินการ");
         }
+      });
+  };
+
+  const converSecret = randomString => {
+    var binary = "";
+    for (var i = 0; i < randomString.length; i++) {
+      binary += randomString[i].charCodeAt(0).toString(2) + "";
+    }
+    let a = binary.slice(0, 112);
+    let b = binary.slice(112, 224);
+    let c = binary.slice(224, 336);
+    let d = binary.slice(336, 448);
+
+    const A = new BigNumber(a, 2).toString(10);
+    const B = new BigNumber(b, 2).toString(10);
+    const C = new BigNumber(c, 2).toString(10);
+    const D = new BigNumber(d, 2).toString(10);
+    return [A, B, C, D];
+  };
+
+  const getProofs = arr => {
+    fetch("http://127.0.0.1:5000/get_proofs", {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      method: "POST",
+      body: JSON.stringify({
+        a: arr[0],
+        b: arr[1],
+        c: arr[2],
+        d: arr[3]
+      })
+    })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result !== "false") {
+          setStatus(<span style={{ fontSize: 15 }}>ลายนิ้วมือถูกต้อง</span>);
+          setDescription("พร้อมดำเนินการ");
+          sendVote(res.result);
+        } else {
+          setStatus(
+            <span style={{ fontSize: 15, color: "red" }}>เข้ารหัสผิดพลาด</span>
+          );
+          setDescription("ไม่พร้อมดำเนินการ");
+        }
+      });
+  };
+
+  const sendVote = proof => {
+    let web3 = props.drizzle.web3;
+    let ElectionContract = new web3.eth.Contract(
+      ElectionInterface.abi,
+      "0x09D3305b2b3689D779777AEa67821AAdBf38795B"
+    );
+
+    let A = proof["proof"]["a"].map(item => {
+      return new BigNumber(item);
+    });
+
+    let B1 = proof["proof"]["b"][0].map(item => {
+      return new BigNumber(item);
+    });
+
+    let B2 = proof["proof"]["b"][1].map(item => {
+      return new BigNumber(item);
+    });
+
+    let C = proof["proof"]["c"].map(item => {
+      return new BigNumber(item);
+    });
+
+    let input = proof["inputs"].map(item => {
+      return new BigNumber(item);
+    });
+
+    ElectionContract.methods
+      .Vote(props.id, A, [B1, B2], C, input)
+      .send({ from: props.addr })
+      .then(function(receipt) {
+        /*if (receipt.status === true) {
+          socket.emit("request_to_server", "vote_success");
+        } else {
+          socket.emit("request_to_server", "vote_fail");
+        }*/
+      })
+      .catch(err => {
+        /*socket.emit("request_to_server", "vote_fail");*/
       });
   };
 
