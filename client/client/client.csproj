@@ -33,6 +33,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AxInterop.ZKFPEngXControl">
+      <HintPath>..\..\..\Zk-voting\client\client\bin\Debug\AxInterop.ZKFPEngXControl.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.ZKFPEngXControl">
+      <HintPath>..\..\..\Zk-voting\client\client\bin\Debug\Interop.ZKFPEngXControl.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />

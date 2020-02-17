@@ -24,7 +24,6 @@ export default class MyComponent extends Component {
 
   handleClick = e => {
     this.setState({ candidateIdSelected: e, visible: true });
-    console.log(this.state.candidateIdSelected);
   };
 
   handleModal = value => {

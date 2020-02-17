@@ -83,7 +83,16 @@ def setup():
 ''' ******end of zokrates command****** '''
 
 
-def get_file():
+def check():
+    subprocess.call(
+        "cd " + cfg["app_location"] + "/client/client/bin/Debug/ &&\
+        client.exe check_device", shell=True)
+    with open(cfg["app_location"]+'/client/client/bin/Debug/result.txt') as f:
+        data = f.read()
+    return data
+
+
+def verify():
     subprocess.call(
         "cd " + cfg["app_location"] + "/client/client/bin/Debug/ &&\
         client.exe SUWAT", shell=True)
@@ -131,9 +140,15 @@ def makes_witness():
     ''' ******end of zokrates route****** '''
 
 
-@app.route("/get", methods=["GET"])
+@app.route("/start_verify", methods=["GET"])
 def get():
-    result = get_file()
+    "'result = get_file()'"
+    return json.dumps({'result': 200})
+
+
+@app.route("/check_device", methods=["GET"])
+def checks():
+    result = check()
     return json.dumps({'result': result})
 
 

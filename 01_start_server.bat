@@ -1,1 +1,1 @@
-conda activate zokrates && python server.py
+conda activate zokrates && python server.py  && pause

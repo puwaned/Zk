@@ -148,3 +148,11 @@ body {
   /* min-width: 100%;
   min-height: 100%; */
 }
+
+.ant-modal-body {
+  height: 386px;
+}
+
+.ant-card-body {
+  height: 138px;
+}

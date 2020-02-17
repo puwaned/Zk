@@ -21,12 +21,16 @@ class RightMenu extends Component {
           </Menu.ItemGroup>
           <Menu.ItemGroup title="Contact us">
             <Menu.Item key="setting:3">
-              <Icon type="facebook" />
-              facebook
+              <a href="https://web.facebook.com/puwanedz" target="_blank">
+                <Icon type="facebook" />
+                facebook
+              </a>
             </Menu.Item>
             <Menu.Item key="setting:4">
-              <Icon type="github" />
-              github
+              <a href="https://github.com/puwaned" target="_blank">
+                <Icon type="github" />
+                github
+              </a>
             </Menu.Item>
           </Menu.ItemGroup>
         </SubMenu>
