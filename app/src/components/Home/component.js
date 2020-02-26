@@ -75,7 +75,7 @@ export default class MyComponent extends Component {
         </div>
 
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <Row gutter={16} style={{ marginTop: "50px" }}>
+          <Row gutter={16} style={{ marginTop: "20px" }}>
             {this.renderCandidateCard()}
           </Row>
         </div>

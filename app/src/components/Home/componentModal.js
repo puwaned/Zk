@@ -130,7 +130,11 @@ const VoteBox = props => {
           );
           setDescription("ไม่พร้อมดำเนินการ");
           setImage(
-            <img alt="unplug" src={process.env.PUBLIC_URL + "unplug.jpg"} />
+            <img
+              style={{ borderBottom: "1px solid #e8e8e8" }}
+              alt="unplug"
+              src={process.env.PUBLIC_URL + "unplug.jpg"}
+            />
           );
         }
       });
@@ -192,7 +196,7 @@ const VoteBox = props => {
     let web3 = props.drizzle.web3;
     let ElectionContract = new web3.eth.Contract(
       ElectionInterface.abi,
-      "0xFa138ef09ae751E8E67FbA257EFEDD8527E3ce0d"
+      "0x27CEbBbaCa3cb1dDE3c3f13A4544e01b44698515"
     );
 
     let A = proof["proof"]["a"].map(item => {
