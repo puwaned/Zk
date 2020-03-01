@@ -110,6 +110,15 @@ def verify_2(finger):
     return data
 
 
+def updateVoteStatus(id):
+    subprocess.call(
+        "cd " + cfg["app_location"] + "/client/client/bin/Debug/ &&\
+        client.exe done " + str(id), shell=True)
+    with open(cfg["app_location"]+'/client/client/bin/Debug/update_status.txt') as f:
+        data = f.read()
+    return data
+
+
 app = Flask(__name__)
 CORS(app)
 
@@ -166,6 +175,15 @@ def v2():
 @app.route("/check_device", methods=["GET"])
 def checks():
     result = check()
+    return json.dumps({'result': result})
+
+
+@app.route("/done", methods=["POST"])
+def dones():
+    data = json.loads(request.data)
+    voter_id = data["voter_id"]
+    print(voter_id)
+    result = updateVoteStatus(voter_id)
     return json.dumps({'result': result})
 
 

@@ -1,5 +1,5 @@
-import React, { Component, useState, useEffect } from "react";
-import { Card, Modal, Button, Icon, Row, Col, Spin } from "antd";
+import React, { useState, useEffect } from "react";
+import { Card, Modal, Button, Icon, message, Spin } from "antd";
 import { ContractData } from "drizzle-react-components";
 import BigNumber from "bignumber.js";
 import ElectionInterface from "../../contracts/Election.json";
@@ -100,23 +100,39 @@ const VoteBox = props => {
                 })
                   .then(res => res.json())
                   .then(res => {
-                    console.log(res.result);
-                    if (res.result !== "false") {
+                    let result = JSON.parse(res.result);
+                    if (result.status === true) {
                       setStatus(
                         <span style={{ fontSize: 15 }}>กำลังสร้างหลักฐาน</span>
                       );
-                      getProofs(converSecret(res.result));
+
+                      getProofs(converSecret(result.secret), result.id);
                       //fourth fetch
-                    } else {
+                    } else if (result.status === false) {
                       setImage(
                         <img
                           alt="correct"
                           src={process.env.PUBLIC_URL + "incorrect.jpg"}
+                          style={{ borderBottom: "1px solid #e8e8e8" }}
                         />
                       );
                       setStatus(
                         <span style={{ fontSize: 15, color: "red" }}>
                           ลายนิ้วมือไม่ถูกต้อง
+                        </span>
+                      );
+                      setDescription("ไม่พร้อมดำเนินการ");
+                    } else if (result.status === "voted") {
+                      setImage(
+                        <img
+                          alt="correct"
+                          src={process.env.PUBLIC_URL + "voted.jpg"}
+                          style={{ borderBottom: "1px solid #e8e8e8" }}
+                        />
+                      );
+                      setStatus(
+                        <span style={{ fontSize: 15, color: "red" }}>
+                          คุณได้ลงคะแนนแล้ว
                         </span>
                       );
                       setDescription("ไม่พร้อมดำเนินการ");
@@ -157,7 +173,7 @@ const VoteBox = props => {
     return [A, B, C, D];
   };
 
-  const getProofs = arr => {
+  const getProofs = (arr, voter_id) => {
     fetch("http://127.0.0.1:5000/get_proofs", {
       headers: {
         Accept: "application/json",
@@ -179,7 +195,7 @@ const VoteBox = props => {
           setImage(
             <img alt="correct" src={process.env.PUBLIC_URL + "correct.jpg"} />
           );
-          sendVote(res.result);
+          sendVote(res.result, voter_id);
         } else {
           setStatus(
             <span style={{ fontSize: 15, color: "red" }}>เข้ารหัสผิดพลาด</span>
@@ -192,11 +208,11 @@ const VoteBox = props => {
       });
   };
 
-  const sendVote = proof => {
+  const sendVote = (proof, voter_id) => {
     let web3 = props.drizzle.web3;
     let ElectionContract = new web3.eth.Contract(
       ElectionInterface.abi,
-      "0x27CEbBbaCa3cb1dDE3c3f13A4544e01b44698515"
+      "0xEbaa78BBb964D2fF507197a3BF53CCDF10582003"
     );
 
     let A = proof["proof"]["a"].map(item => {
@@ -224,10 +240,28 @@ const VoteBox = props => {
       .send({ from: props.addr })
       .then(function(receipt) {
         if (receipt.status === true) {
-        } else {
+          fetch("http://127.0.0.1:5000/done", {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json"
+            },
+            method: "POST",
+            body: JSON.stringify({
+              voter_id: voter_id
+            })
+          })
+            .then(res => res.json())
+            .then(res => {
+              if (res.result === "true") {
+                props.parentCallback(false);
+                message.success("ทำการลงคะแนนเสร็จสมบูรณ์");
+              }
+            });
         }
       })
-      .catch(err => {});
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   return (

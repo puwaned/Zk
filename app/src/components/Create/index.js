@@ -1,8 +1,4 @@
 import React, { Component } from "react";
-import { Typography, Icon, Card, Button } from "antd";
-const { Text } = Typography;
-const { Meta } = Card;
-const antIcon = <Icon type="loading" style={{ fontSize: "5rem" }} spin />;
 
 class Create extends Component {
   state = {

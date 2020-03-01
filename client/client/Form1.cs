@@ -18,7 +18,7 @@ namespace client
         private AxZKFPEngX ZkFprint = new AxZKFPEngX();
         private bool Check;
         private string Argument;
-        private string _argument_secret;
+        private string Sub_Argument;
         OleDbConnection con;
         OleDbDataAdapter da;
         DataSet ds;
@@ -30,12 +30,11 @@ namespace client
             if (Args.Length == 1)
             {
                 Argument = Args[0];
-                
             }
             else
             {
                 Argument = Args[0];
-                _argument_secret = Args[1];
+                Sub_Argument = Args[1];
             }
         }
 
@@ -64,6 +63,32 @@ namespace client
                 con.Close();
             }
             return templetes;
+        }
+
+        private void updateVoteStatus(int id)
+        {
+            con = new OleDbConnection("Provider=Microsoft.ACE.Oledb.12.0;Data Source=userDB.accdb");
+            
+            string query = "UPDATE [user_data] SET [voted] = ? WHERE ID = ?";
+            try
+            {
+                con.Open();
+                var accessUpdateCommand = new OleDbCommand(query, con);
+                accessUpdateCommand.Parameters.AddWithValue("voted", -1);
+                accessUpdateCommand.Parameters.AddWithValue("ID", id);
+                da = new OleDbDataAdapter();
+                da.UpdateCommand = accessUpdateCommand;
+                da.UpdateCommand.ExecuteNonQuery();
+                writeResult("update_status", "true");
+            }
+            catch (Exception e)
+            {
+                writeResult("update_status", e.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
         }
 
         private void zkFprint_OnEnroll(object sender, IZKFPEngXEvents_OnEnrollEvent e)
@@ -150,6 +175,7 @@ namespace client
             bool Match = false;
             bool Voted = true;
             string Secret = "";
+            string Id = "";
             for (int i = 0; i < temp.Count; i++)
             {
                 if (ZkFprint.VerFingerFromStr(ref finger, temp[i].finger, false, ref Check))
@@ -159,6 +185,7 @@ namespace client
                     if (temp[i].voted == false.ToString())
                     {
                         Secret = temp[i].secret;
+                        Id = temp[i].id.ToString();
                         Voted = false;
                     }
                     else
@@ -171,16 +198,16 @@ namespace client
             {
                 if (Voted)
                 {
-                    writeResult("verify", "voted");
+                    writeResult("verify", "{" + "\"status\"" + ":" + "\"voted\"" + "}");
                 }
                 else
                 {
-                    writeResult("verify", Secret);
+                    writeResult("verify", "{" + "\"status\"" + ":" + "true" + "," + "\"id\"" + ":" + Id + "," + "\"secret\"" + ":" + "\"" + Secret + "\"" + "}");
                 }
             }
             else
             {
-                writeResult("verify", "false");
+                writeResult("verify", "{" + "\"status\"" + ":" + "false" + "}");
             }
             Application.Exit();
         }
@@ -314,7 +341,11 @@ namespace client
                     ZkFprint.BeginCapture();
                     break;
                 case "verify_2":
-                    fetch_Finger(_argument_secret);
+                    fetch_Finger(Sub_Argument);
+                    break;
+                case "done":
+                    updateVoteStatus(Int32.Parse(Sub_Argument));
+                    Application.Exit();
                     break;
             }
 

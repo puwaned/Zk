@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { ContractData, ContractForm } from "drizzle-react-components";
-import { Card, Button, Col, Row } from "antd";
+import { ContractData } from "drizzle-react-components";
+import { Card, Col, Row } from "antd";
 import Modal from "./componentModal";
 import PropTypes from "prop-types";
 const { Meta } = Card;
