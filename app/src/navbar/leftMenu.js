@@ -25,12 +25,6 @@ class LeftMenu extends Component {
             Home
           </Link>
         </Menu.Item>
-        <Menu.Item key="create">
-          <Link to="/create">
-            <Icon type="plus-circle" />
-            Create Proofs
-          </Link>
-        </Menu.Item>
         <Menu.Item key="dev">
           <Link to="/dev">
             <Icon type="tool" />

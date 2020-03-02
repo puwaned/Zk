@@ -3,7 +3,6 @@ import { HashRouter, Switch, Route } from "react-router-dom";
 import "./App.css";
 import Navbar from "./navbar";
 const Home = React.lazy(() => import("./components/Home"));
-const Create = React.lazy(() => import("./components/Create"));
 const Dev = React.lazy(() => import("./components/Dev"));
 const loading = () => (
   <center>
@@ -19,7 +18,6 @@ class App extends React.Component {
           <div className="container-custom">
             <Suspense fallback={loading()}>
               <Switch>
-                <Route path="/create" component={Create} />
                 <Route path="/dev" component={Dev} />
                 <Route exact path="/" component={Home} />
               </Switch>

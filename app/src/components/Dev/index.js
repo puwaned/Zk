@@ -1,91 +1,113 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import BigNumber from "bignumber.js";
-import axios from "axios";
-import { Input, Icon, Button, Row, Col } from "antd";
-const { TextArea } = Input;
-const antIcon = <Icon type="loading" style={{ fontSize: "5rem" }} spin />;
+import { Input, Button, List, Spin, Tabs } from "antd";
+const { TabPane } = Tabs;
 
-class Dev extends Component {
-  state = {
-    secret: [],
-    h: ["", ""],
-    loading: false
+const Dev = props => {
+  const [secret, setSecret] = useState([]);
+  const [secretText, setSecretText] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
+  const [h, setH] = useState([]);
+
+  const get = async () => {
+    setLoading(true);
+    const data = await (await fetch("http://127.0.0.1:5000/get_secret_key"))
+      .json()
+      .finally(() => {
+        setLoading(false);
+      });
+    const result = await data.result.split(",");
+    setSecret(result);
   };
 
-  componentDidMount() {}
-
-  getSecretHash = () => {
-    this.setState({ loading: true });
-    let randomString = this.state.secret_text;
-    var binary = "";
-    for (var i = 0; i < randomString.length; i++) {
-      binary += randomString[i].charCodeAt(0).toString(2) + "";
+  const convertSecret = secret => {
+    let binary = "";
+    for (var i = 0; i < secret.length; i++) {
+      binary += secret[i].charCodeAt(0).toString(2) + "";
     }
-    let a = binary.slice(0, 112);
-    let b = binary.slice(112, 224);
-    let c = binary.slice(224, 336);
-    let d = binary.slice(336, 448);
+    const first = new BigNumber(binary.slice(0, 112), 2).toString(10);
+    const second = new BigNumber(binary.slice(112, 224), 2).toString(10);
+    const third = new BigNumber(binary.slice(224, 336), 2).toString(10);
+    const fourth = new BigNumber(binary.slice(336, 448), 2).toString(10);
 
-    const A = new BigNumber(a, 2).toString(10);
-    const B = new BigNumber(b, 2).toString(10);
-    const C = new BigNumber(c, 2).toString(10);
-    const D = new BigNumber(d, 2).toString(10);
+    return [first, second, third, fourth];
+  };
 
-    axios
-      .post("http://127.0.0.1:5000/create_secret", {
-        a: A,
-        b: B,
-        c: C,
-        d: D
+  const create_proof = () => {
+    setLoading2(true);
+    const secret = convertSecret(secretText);
+    fetch("http://127.0.0.1:5000/create_secret", {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      method: "POST",
+      body: JSON.stringify({
+        a: secret[0],
+        b: secret[1],
+        c: secret[2],
+        d: secret[3]
       })
-      .then(response => {
-        console.log(response.data["h0"] + " " + response.data["h1"]);
-        this.setState({ h: [response.data["h0"], response.data["h1"]] });
+    })
+      .then(res => res.json())
+      .then(res => {
+        const data = [res.h0, res.h1];
+        setH(data);
       })
-      .catch(error => {})
+      .catch(err => {
+        console.log(err);
+      })
       .finally(() => {
-        this.setState({ loading: false });
+        setLoading2(false);
       });
   };
-
-  handleOnChange = e => {
-    this.setState({ secret_text: e.target.value });
-  };
-
-  render() {
-    return (
-      <div style={{ marginTop: "20px" }}>
-        <Row gutter={16}>
-          <Col span={12}>
-            <h2>get all secret </h2>
-            <Button>click to get all secret</Button>
-            <TextArea rows={10} value={this.state.secret} />
-            <br />.
-          </Col>
-          <Col span={12}>
-            <h2>get secret hash</h2>
-            <br />
-            <Input
-              style={{ width: 400 }}
-              placeholder="Basic usage"
-              onChange={this.handleOnChange}
-            />
-            <span> </span>
-            <Button onClick={this.getSecretHash}>submit</Button>
-            <br /> <hr />
-            {this.state.loading ? (
-              antIcon
-            ) : (
-              <div>
-                <p>h0 : {this.state.h[0]}</p>
-                <p>h1 : {this.state.h[1]}</p>
+  return (
+    <div style={{ marginTop: "20px" }}>
+      <div className="card-container">
+        <Tabs type="card">
+          <TabPane tab="Get Secret key" key="1">
+            <div style={{ padding: 30 }}>
+              <Button onClick={get}>GET SECRET</Button>{" "}
+              {loading ? <Spin /> : ""}
+              <List
+                style={{ marginTop: 20 }}
+                size="large"
+                bordered
+                dataSource={secret}
+                renderItem={(item, index) => (
+                  <List.Item>
+                    {index + 1} : {item}
+                  </List.Item>
+                )}
+              />
+              <div style={{ marginTop: 30 }}>
+                <Input
+                  placeholder="past secret here"
+                  style={{ width: 400, marginTop: 20 }}
+                  value={secretText}
+                  onChange={e => setSecretText(e.target.value)}
+                />{" "}
+                <Button onClick={create_proof}>GET HASH</Button>{" "}
+                {loading2 ? <Spin /> : ""}
+                <List
+                  style={{ marginTop: 20 }}
+                  size="large"
+                  bordered
+                  dataSource={h}
+                  renderItem={(item, index) => (
+                    <List.Item>
+                      h{index} : {item}
+                    </List.Item>
+                  )}
+                />
               </div>
-            )}
-          </Col>
-        </Row>
+            </div>
+          </TabPane>
+        </Tabs>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 export default Dev;

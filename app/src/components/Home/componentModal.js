@@ -212,7 +212,7 @@ const VoteBox = props => {
     let web3 = props.drizzle.web3;
     let ElectionContract = new web3.eth.Contract(
       ElectionInterface.abi,
-      "0xCAe6d733555Aa50B7076577468b4C54160711A06"
+      "0xC16D579B34463E32a9a344547934EEB6feAE646C"
     );
 
     let A = proof["proof"]["a"].map(item => {

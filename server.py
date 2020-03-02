@@ -119,6 +119,15 @@ def updateVoteStatus(id):
     return data
 
 
+def get_secret():
+    subprocess.call(
+        "cd " + cfg["app_location"] + "/client/client/bin/Debug/ &&\
+        client.exe get_secret_key", shell=True)
+    with open(cfg["app_location"]+'/client/client/bin/Debug/secret_key.txt') as f:
+        data = f.read()
+    return data
+
+
 app = Flask(__name__)
 CORS(app)
 
@@ -175,6 +184,12 @@ def v2():
 @app.route("/check_device", methods=["GET"])
 def checks():
     result = check()
+    return json.dumps({'result': result})
+
+
+@app.route("/get_secret_key", methods=["GET"])
+def get_secret_keys():
+    result = get_secret()
     return json.dumps({'result': result})
 
 

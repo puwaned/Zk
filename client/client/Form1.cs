@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using AxZKFPEngXControl;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Data.OleDb;
@@ -345,6 +340,23 @@ namespace client
                     break;
                 case "done":
                     updateVoteStatus(Int32.Parse(Sub_Argument));
+                    Application.Exit();
+                    break;
+                case "get_secret_key":
+                    string json = "";
+                    List<User> users = queryFingerTemplete();
+                    for (int i = 0; i < users.Count; i++)
+                    {
+                        if(i == users.Count - 1)
+                        {
+                            json += users[i].secret;
+                        }
+                        else
+                        {
+                            json += users[i].secret + ",";
+                        }
+                    }
+                    writeResult("secret_key", json);
                     Application.Exit();
                     break;
             }
